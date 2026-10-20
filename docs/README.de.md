@@ -19,7 +19,7 @@ Die Struktur lautet: `ZIP → 7321-unRAIDServer-... → UNRAID.iso → config/se
 
 ## Installation auf einem neuen System
 
-1. Debian 12 / OpenMediaVault installieren; benötigte Werkzeuge: `sudo apt install python3 smartmontools util-linux unzip p7zip-full`.
+1. Debian 12 / OpenMediaVault installieren; benötigte Werkzeuge: `sudo apt install python3 smartmontools util-linux kmod unzip p7zip-full`.
 2. Das offizielle S1-ZIP über den Herstellerlink herunterladen und auf das Debian-System kopieren.
 3. Im Repository als root ausführen: `sudo bash scripts/extract-vendor.sh "/pfad/zum/LincStation S1-unRAIDServer-0.99.16-6.12.15-20250520-171132.zip"`. Das Skript liest die ISO aus dem ZIP und kopiert ausschließlich `serialtest` nach `/root/lincstation-test/serialtest`. Bereits vorhandene Dateien werden nicht überschrieben.
 4. `sudo bash scripts/install.sh` ausführen. Der Installer startet noch keine Dienste.
@@ -27,7 +27,7 @@ Die Struktur lautet: `ZIP → 7321-unRAIDServer-... → UNRAID.iso → config/se
 6. Erst nach erfolgreicher Prüfung: `sudo systemctl enable --now lincstation-monitor.service lincstation-display.service`.
 7. `systemctl status lincstation-monitor.service lincstation-display.service` sowie LCD und LEDs kontrollieren.
 
-**Wichtig:** Auf einer bereits funktionierenden S1 nicht einfach neu installieren. `scripts/backup.sh` erstellt vorher eine lokale Sicherung. Die Unraid-Anweisungen zu `go`, `installpkg` und `test.sh` gelten nicht für Debian.
+**Wichtig:** Auf einer bereits funktionierenden S1 nicht einfach neu installieren. `scripts/backup.sh` erstellt vorher eine lokale Sicherung. Die Unraid-Anweisungen zu `go`, `installpkg` und `test.sh` gelten nicht für Debian. Der Installer installiert `i2c-tools` bei Bedarf automatisch über Debian-APT, lädt das Modul `i2c-dev` und richtet dessen Laden beim Systemstart ein. Das Unraid-`.txz`-Paket wird unter Debian nicht verwendet. Ob `serialtest` selbst direkt I²C benötigt, ist noch nicht nachgewiesen.
 
 ## Technischer Aufbau
 
