@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+*.tar.gz
+*.zip
+serialtest
+state.json
+*.log
+*.bak*
+.DS_Store
+
+hardware-map.json
+*github-export*

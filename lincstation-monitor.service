@@ -1,0 +1,16 @@
+[Unit]
+Description=LincStation S1 Debian System Monitor
+After=local-fs.target
+
+[Service]
+Type=simple
+User=root
+ExecStart=/usr/bin/python3 -u /root/lincstation-test/debian-monitor.py
+Restart=on-failure
+RestartSec=5
+RuntimeDirectory=lincstation
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

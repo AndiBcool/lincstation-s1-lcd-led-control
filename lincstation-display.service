@@ -1,0 +1,17 @@
+[Unit]
+Description=LincStation S1 Original LCD and Disk LED Controller
+Requires=lincstation-monitor.service
+After=lincstation-monitor.service
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/root/lincstation-test
+ExecStart=/root/lincstation-test/serialtest -c 2147483647
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

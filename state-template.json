@@ -1,0 +1,55 @@
+{
+  "deviceInfo": {
+    "model": "LincStation S1",
+    "serialNumber": "UNKNOWN",
+    "temperature": 0
+  },
+  "processor": {
+    "model": "Unknown",
+    "usage": {
+      "total": 0.0,
+      "cores": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "temperature": 0,
+    "cores": 4,
+    "currentFrequency": "0MHz",
+    "maxFrequency": "0MHz"
+  },
+  "disks": [
+    {
+      "slot": "5",
+      "name": "Disk slot 5",
+      "temperature": 0,
+      "healthy": false
+    },
+    {
+      "slot": "6",
+      "name": "Disk slot 6",
+      "temperature": 0,
+      "healthy": false
+    },
+    {
+      "slot": "1",
+      "name": "Disk slot 1",
+      "temperature": 0,
+      "healthy": false
+    },
+    {
+      "slot": "2",
+      "name": "Disk slot 2",
+      "temperature": 0,
+      "healthy": false
+    }
+  ],
+  "networkInterfaces": [],
+  "memory": {
+    "total": 0,
+    "used": 0,
+    "free": 0
+  }
+}
