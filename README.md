@@ -35,7 +35,7 @@ Download the archive yourself from the manufacturer's link. On Debian, `sudo apt
 
 ## Installation (conservative, manual confirmation required)
 
-1. Install Debian 12 / OpenMediaVault and required tools: `apt install python3 smartmontools util-linux`. Confirm `/dev/ttyS0` exists and is not already in use.
+1. Install Debian 12 / OpenMediaVault and prerequisites: `sudo apt install python3 smartmontools util-linux kmod unzip p7zip-full`. Confirm `/dev/ttyS0` exists and is not already in use. The installer additionally installs Debian `i2c-tools` through APT if missing, loads `i2c-dev`, and configures it to load on boot. Do **not** install the Unraid `.txz` package on Debian. The vendor includes I²C tooling for its S-series setup; the exact direct dependency of `serialtest` remains unverified.
 2. Obtain the vendor **`serialtest`** using the official S1 recovery download and `scripts/extract-vendor.sh` described above (or place a lawfully obtained copy at `/root/lincstation-test/serialtest` and run `chmod 755 /root/lincstation-test/serialtest`). The original `monitor` executable is **not required**: this project replaces its metric collection with Python.
 3. Clone/download this repository. Run `bash scripts/install.sh` as root. It installs files but **does not enable or start services**. It refuses to modify an installation while either LincStation service is active.
 4. On a fresh machine, run `python3 scripts/configure.py` **after** installation, from the repository directory. It lists candidate disks/interfaces and requires explicit confirmation of physical slot mapping. Never assume `/dev/sda` is always bay 1; review `/root/lincstation-test/hardware-map.json` and `/root/lincstation-test/state-template.json`.
