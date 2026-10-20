@@ -22,6 +22,21 @@ fi
 if [[ ! -x "$DEST/serialtest" ]]; then echo "Vendor binary is not executable: $DEST/serialtest" >&2; exit 1; fi
 command -v smartctl >/dev/null || { echo "Install smartmontools first: apt install smartmontools" >&2; exit 1; }
 command -v python3 >/dev/null || { echo "Python 3 is required" >&2; exit 1; }
+# Debian packages, not the Slackware/Unraid .txz supplied in the recovery ISO.
+if ! dpkg-query -W -f='${Status}' i2c-tools 2>/dev/null | grep -qx 'install ok installed'; then
+  echo "Installing required Debian package: i2c-tools"
+  apt-get update
+  DEBIAN_FRONTEND=noninteractive apt-get install -y i2c-tools
+fi
+command -v modprobe >/dev/null || { echo "modprobe is required (install kmod)." >&2; exit 1; }
+if ! grep -q '^i2c_dev ' /proc/modules; then
+  echo "Loading i2c-dev kernel module"
+  modprobe i2c-dev
+fi
+# Load i2c-dev on future boots; do not overwrite an existing module config.
+if [[ ! -e /etc/modules-load.d/lincstation-s1-i2c.conf ]]; then
+  printf 'i2c-dev\n' > /etc/modules-load.d/lincstation-s1-i2c.conf
+fi
 [[ -e /dev/ttyS0 ]] || { echo "Warning: /dev/ttyS0 not found" >&2; }
 mkdir -p "$DEST" /etc/systemd/system/lincstation-display.service.d
 STAMP=$(date +%Y%m%d-%H%M%S)
