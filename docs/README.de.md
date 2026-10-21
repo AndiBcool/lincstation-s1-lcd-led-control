@@ -132,7 +132,13 @@ Die veröffentlichte Beispiel-JSON enthält keine echte Seriennummer, sondern `U
 
 ## Lizenz und Herstellerrechte
 
-Das originale `serialtest` und das originale `monitor` dürfen nicht ohne entsprechende Erlaubnis im öffentlichen Repository verteilt werden. Ein offizieller Downloadlink allein erteilt keine Weiterverbreitungsrechte. Für den selbst entwickelten Projektcode muss eine eigene Lizenz festgelegt werden.
+Das originale `serialtest` und das originale `monitor` dürfen nicht ohne entsprechende Erlaubnis im öffentlichen Repository verteilt werden. Ein offizieller Downloadlink allein erteilt keine Weiterverbreitungsrechte. 
+
+## Lizenz
+
+Dieses Projekt steht unter der GNU General Public License Version 3 (GPL-3.0). Einzelheiten stehen in der [LICENSE-Datei](../LICENSE).
+
+Die originale LincStation-Firmware und herstellereigene Programme wie `serialtest` fallen nicht unter die GPL-Lizenz dieses Projekts und werden nicht im Repository mitgeliefert.
 
 ## Weitere Projekte
 
