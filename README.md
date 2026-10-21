@@ -147,7 +147,12 @@ The published example JSON contains `UNKNOWN`, not a real serial number. The Pyt
 
 ## Licensing and vendor rights
 
-Do not redistribute the original `serialtest` or `monitor` executables in a public repository without appropriate permission. A public vendor download link does not itself grant redistribution rights. A license for the community-written code still needs to be selected.
+Do not redistribute the original `serialtest` or `monitor` executables in a public repository without appropriate permission. A public vendor download link does not itself grant redistribution rights. 
+## License
+
+This project is licensed under the GNU General Public License v3.0 (GPL-3.0). See the [LICENSE](LICENSE) file for details.
+
+The original LincStation firmware and proprietary utilities, including `serialtest`, are not part of this project's GPL license and are not redistributed in this repository.
 
 ## Related projects
 
