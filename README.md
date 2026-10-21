@@ -1,84 +1,154 @@
-# LincStation S1 LCD & LED Support for Debian / OpenMediaVault
+# LincStation S1 – LCD Display & LED Control on Debian / OpenMediaVault
 
-**🌐 Language / Sprache:** English | [Deutsch](docs/README.de.md)
-**Community project — not affiliated with LincStation.**
+**🌐 Language / Sprache:** **English** | [Deutsch](docs/README.de.md)
 
-On some non-vendor operating system installations, including our Debian 12 / OpenMediaVault setup, the LincStation S1's integrated LCD powers on but repeatedly restarts without showing useful values, and disk status LEDs remain off. This project restores the original LCD pages and status LEDs by feeding live Linux metrics to a vendor-provided display controller program.
+**Unofficial community project — not affiliated with LincStation.**
+
+This project restores the original LCD pages and status LEDs on a LincStation S1 running Debian 12 and OpenMediaVault. On our machine, after switching from the vendor operating system, the LCD repeatedly restarted and the drive LEDs remained off. Our Python monitor supplies system metrics to the original vendor executable `serialtest`.
+
+> **Beta (`v0.5.0-beta`):** The LCD, disk LEDs and network LED work on our S1, including after reboot. The complete installation process using these scripts has not yet been tested on a second machine.
 
 ## Confirmed working setup
 
-- LincStation S1; Debian 12 with OpenMediaVault (one tested machine)
-- Original touchscreen LCD pages; disk LEDs and network LED observed working
-- CPU usage/temperature/frequency, memory, network/IP/throughput, four disk temperatures and SMART status
-- BIOS serial number automatically detected locally at runtime (example uses `UNKNOWN`); ACPI thermal-zone reading (physical sensor location **not confirmed**)
-- Two systemd services; reboot-tested
+- LincStation S1 running Debian 12 and OpenMediaVault (one tested machine)
+- Four original LCD pages, drive LEDs and network LED
+- CPU usage and frequency, RAM, network/IP/throughput
+- Disk temperatures, SMART health and other temperature readings
+- Automatic local detection of each machine's own BIOS serial number
+- Two systemd services configured to start on boot
 
-**Not guaranteed on other hardware revisions, OS releases or disk/network mappings.** LCD-reported firmware `30.17` is *not independently verified* as controller firmware; vendor program `serialtest -v` reports `V22.22`.
+Hardware revisions, interface names and physical disk mappings may differ on other systems.
 
 ## How it works
 
-`src/debian-monitor.py` periodically writes JSON to `/run/lincstation/state.json`. The original vendor `serialtest` binary reads `/var/unraid-systemMonitor/state.json`, which must point to that runtime JSON. The vendor binary communicates with the controller on `/dev/ttyS0` (9600 baud observed in the tested setup). The JSON schema and service behavior are based on the working installation.
+`src/debian-monitor.py` writes metrics to `/run/lincstation/state.json`. The compatibility symlink `/var/unraid-systemMonitor/state.json` lets the original `serialtest` read those metrics. On the tested machine, the display controller communicates over `/dev/ttyS0` at 9600 baud.
 
-## Important: vendor component
+The original vendor `monitor` executable is **not required** because our Python monitor replaces it. No display firmware is flashed.
 
-The **original vendor executable `serialtest` is not distributed** in this repository. You must obtain it from a source you are authorized to use and place it at `/root/lincstation-test/serialtest`. We do not claim rights to redistribute it or its firmware. The Python monitor and repository scripts are separate community-written components. No LCD firmware flashing is required.
+## Obtain the original vendor `serialtest`
 
-## Official S1 recovery package (ZIP containing UNRAID.iso)
+The vendor executable is **not distributed** through this GitHub repository. Download the [official LincStation S1 recovery package (Google Drive)](https://drive.google.com/file/d/1cnAWnFPu-5ryIhjftFlg71YqRRDEZJa-/view?usp=sharing).
 
-LincStation's official recovery instructions provide the S1 package:
+Package filename: `LincStation S1-unRAIDServer-0.99.16-6.12.15-20250520-171132.zip`
 
-- [S1 official Google Drive recovery download](https://drive.google.com/file/d/1cnAWnFPu-5ryIhjftFlg71YqRRDEZJa-/view?usp=sharing)
-- Package filename: `LincStation S1-unRAIDServer-0.99.16-6.12.15-20250520-171132.zip`
-- Documented path: `ZIP → 7321-unRAIDServer-... → UNRAID.iso → config/serial/serialtest` (and `test.sh`)
+**Vendor package layout:**
 
-Download the archive yourself from the manufacturer's link. On Debian, `sudo apt install unzip p7zip-full` then run `sudo bash scripts/extract-vendor.sh "/path/to/LincStation S1-unRAIDServer-0.99.16-6.12.15-20250520-171132.zip"`. This script extracts **only** `serialtest` without unpacking the full ZIP to disk. It checks the archive filename, expected ISO path and ELF signature, and **refuses to overwrite an existing executable or modify a running installation**. It does not install the original `monitor` or run the Unraid `test.sh`. It has not yet been tested against the actual manufacturer ZIP; paths are based on the documented package layout. Downloading from the vendor does not confer redistribution rights.
+```text
+LincStation S1 ... .zip
+└── 7321-unRAIDServer-...
+    └── UNRAID.iso
+        └── config/
+            ├── serial/
+            │   ├── serialtest
+            │   └── test.sh
+            └── pkg/
+                └── i2c-tools-4.1-x86_64-1_slonly.txz
+```
 
-## Installation (conservative, manual confirmation required)
+On Debian, **do not install** the Unraid `.txz` package. Our installer uses Debian APT to install `i2c-tools` and loads the `i2c-dev` kernel module.
 
-1. Install Debian 12 / OpenMediaVault and prerequisites: `sudo apt install python3 smartmontools util-linux kmod unzip p7zip-full`. Confirm `/dev/ttyS0` exists and is not already in use. The installer additionally installs Debian `i2c-tools` through APT if missing, loads `i2c-dev`, and configures it to load on boot. Do **not** install the Unraid `.txz` package on Debian. The vendor includes I²C tooling for its S-series setup; the exact direct dependency of `serialtest` remains unverified.
-2. Obtain the vendor **`serialtest`** using the official S1 recovery download and `scripts/extract-vendor.sh` described above (or place a lawfully obtained copy at `/root/lincstation-test/serialtest` and run `chmod 755 /root/lincstation-test/serialtest`). The original `monitor` executable is **not required**: this project replaces its metric collection with Python.
-3. Clone/download this repository. Run `bash scripts/install.sh` as root. It installs files but **does not enable or start services**. It refuses to modify an installation while either LincStation service is active.
-4. On a fresh machine, run `python3 scripts/configure.py` **after** installation, from the repository directory. It lists candidate disks/interfaces and requires explicit confirmation of physical slot mapping. Never assume `/dev/sda` is always bay 1; review `/root/lincstation-test/hardware-map.json` and `/root/lincstation-test/state-template.json`.
-5. Only after confirming mappings, run `systemctl enable --now lincstation-monitor.service lincstation-display.service`.
-6. Check `systemctl status lincstation-monitor.service lincstation-display.service`, `/run/lincstation/state.json`, the LCD pages and LEDs.
+## Installation on a new S1
 
-**Existing working installations:** Do not run the installer. Use `bash scripts/backup.sh` to make a private backup. A fresh-machine end-to-end installation is **not yet tested**.
+**Before starting:** Install Debian 12 / OpenMediaVault. Confirm `/dev/ttyS0` exists and is not in use by another service. Run these commands from the root directory of the downloaded GitHub repository.
 
-## Known limitations
+**1. Install prerequisites:**
 
-- Disk mapping is hard-coded in `DISKS` (slot 5/6 NVMe; 1/2 SATA in the tested setup); `/dev/sdX` can change across boots.
-- Interface names are taken from the JSON template; change them for your system.
-- The JSON template contains neutral placeholder temperatures/health flags until readings arrive. SMART handling depends on `smartctl` output; not every drive type is covered.
-- ACPI `acpitz` was 27.8 °C on the tested machine, but it is **not proven to be chassis temperature**.
-- The display executable is proprietary and is a required external dependency; its source is not included.
-- The original LCD's firmware version display is not populated by our JSON template.
+```bash
+sudo apt update
+sudo apt install python3 smartmontools util-linux kmod unzip p7zip-full
+```
+
+**2. Download the official S1 ZIP** and copy it to your Debian S1. You do not need to manually unpack the ISO.
+
+**3. Extract `serialtest`:**
+
+```bash
+sudo bash scripts/extract-vendor.sh "/path/to/LincStation S1-unRAIDServer-0.99.16-6.12.15-20250520-171132.zip"
+```
+
+The script searches for `serialtest` inside the ISO and places it at `/root/lincstation-test/serialtest`. It checks the executable and will not overwrite an existing copy. **Extraction has not yet been tested against the full vendor ZIP.** Alternatively, manually place a lawfully obtained `serialtest` at that path and make it executable with `chmod 755`.
+
+**4. Install the project:**
+
+```bash
+sudo bash scripts/install.sh
+```
+
+If needed, the installer installs `i2c-tools` through Debian APT, loads `i2c-dev`, and configures the module to load at boot. It copies the project files and service units, but **does not start them yet**. It refuses to overwrite an installation while either LincStation service is active.
+
+**5. Configure hardware mapping:**
+
+```bash
+sudo python3 scripts/configure.py
+```
+
+Review detected disks and network interfaces carefully. Physical bay mapping requires confirmation: `/dev/sda` is not guaranteed to be bay 1 on another machine. Review `/root/lincstation-test/hardware-map.json` and `/root/lincstation-test/state-template.json`.
+
+**6. Enable services only after reviewing the configuration:**
+
+```bash
+sudo systemctl enable --now lincstation-monitor.service lincstation-display.service
+```
+
+**7. Verify operation:**
+
+```bash
+systemctl status lincstation-monitor.service lincstation-display.service
+```
+
+Also inspect `/run/lincstation/state.json`, the LCD pages, and the disk/network LEDs.
+
+**Important:** Unraid instructions such as `installpkg`, editing `/boot/config/go`, or launching `test.sh` do not apply to Debian. Do not install the Unraid I²C `.txz` on Debian.
+
+## Protect an existing installation
+
+Do **not** rerun the installer on a working S1 without reviewing it first. `bash scripts/backup.sh` creates a local backup. Backups can contain private settings and vendor binaries and must not be uploaded publicly.
+
+`bash scripts/uninstall.sh` can remove the installed services while preserving files under `/root/lincstation-test` as a safety copy. Review the script before uninstalling.
 
 ## Repository structure
 
-- `src/debian-monitor.py` — actual tested Python collector, unchanged from the exported running setup
-- `config/state-template.json` — privacy-cleaned example based on tested schema
-- `systemd/` — tested unit files and quiet journal override
-- `scripts/extract-vendor.sh` — extract `serialtest` from official S1 ZIP → ISO (unverified against actual ZIP)
-- `scripts/install.sh` — conservative file installation with backups
-- `scripts/uninstall.sh` — stop/disable/remove services, preserve working data
-- `scripts/backup.sh` — local recovery archive (do not publish archives)
-- `docs/README.de.md` — German instructions
+```text
+lincstation-s1-lcd-led-control/
+├── README.md
+├── NOTICE.md
+├── RELEASE_CHECKLIST.md
+├── .gitignore
+├── docs/
+│   └── README.de.md
+├── src/
+│   └── debian-monitor.py
+├── config/
+│   └── state-template.json
+├── scripts/
+│   ├── extract-vendor.sh
+│   ├── install.sh
+│   ├── configure.py
+│   ├── backup.sh
+│   └── uninstall.sh
+└── systemd/
+    ├── lincstation-monitor.service
+    ├── lincstation-display.service
+    └── quiet.conf
+```
 
-## Privacy and safety
+## Privacy
 
-The example JSON uses `UNKNOWN` and contains no real device serial number. On each installed LincStation, the monitor automatically reads that machine’s own BIOS serial number from `/sys/class/dmi/id/product_serial` and displays it locally via the runtime JSON. **Never commit `/run/lincstation/state.json`**, personal backups, private logs or vendor binaries without permission: runtime JSON contains the real serial number.
+The published example JSON contains `UNKNOWN`, not a real serial number. The Python monitor reads each machine's **own** BIOS serial from `/sys/class/dmi/id/product_serial` at runtime. Never upload `/run/lincstation/state.json`, private logs, backups or vendor executables without redistribution permission.
 
-## Licensing and redistribution
+## Known limitations
 
-This repository contains community-written code only. **Do not upload the original vendor executables `serialtest` or `monitor` to a public repository unless the rights holder grants redistribution rights or a suitable license explicitly permits it.** Access to a vendor download does not itself grant redistribution rights. The original `monitor` is not needed for this solution. A license for our own source must be chosen before a public release; no license is currently granted by this draft.
+- Tested bay mapping: slots 5/6 NVMe and slots 1/2 SATA. Device names may differ across machines or boots.
+- Disk and network mapping is not universal; SMART output varies by drive.
+- The physical location of the `acpitz` temperature sensor is not confirmed.
+- The LCD shows `FW 30.17`, but its interpretation as controller firmware has not been independently verified. `serialtest -v` reports `V22.22`.
+- The vendor bundles I²C tooling; a direct dependency of `serialtest` on these tools has not been separately demonstrated.
+- Full fresh installation, including ZIP/ISO extraction, has not been tested on another machine.
 
-## Installation safety and validation
+## Licensing and vendor rights
 
-- `scripts/install.sh` stages files and does not restart existing services. Run the installer as root from a checked-out repository.
-- `scripts/configure.py` proposes network interfaces and disk names, but requires explicit confirmation; disk numbering is **not** a reliable physical bay identifier.
-- `hardware-map.json` is local and ignored by Git. `/dev/sdX` names may change across boots. Stable device paths are a future improvement; do not change them without testing the sensor matching logic.
-- Syntax and shell checks have been performed; a fresh-machine end-to-end installation has **not** yet been tested.
+Do not redistribute the original `serialtest` or `monitor` executables in a public repository without appropriate permission. A public vendor download link does not itself grant redistribution rights. A license for the community-written code still needs to be selected.
 
 ## Related projects
 
-- [LincStation N1 LED Control](https://github.com/AndiBcool/lincstation-n1-led-control) — separate project for the LincStation N1. **Do not use the N1 installation instructions or binaries for the S1.**
+[LincStation N1 LED Control](https://github.com/AndiBcool/lincstation-n1-led-control) — separate project for the LincStation N1. **N1 and S1 executables and installation instructions are not interchangeable.**
