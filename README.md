@@ -1,14 +1,16 @@
-# LincStation S1 – LCD Display & LED Control on Debian / OpenMediaVault
+# LincStation S1 LCD Display & LED Control for Debian 12 and OpenMediaVault (OMV)
 
 **🌐 Language / Sprache:** **English** | [Deutsch](docs/README.de.md)
 
 **Unofficial community project — not affiliated with LincStation.**
 
-This project restores the original LCD pages and status LEDs on a LincStation S1 running Debian 12 and OpenMediaVault. On our machine, after switching from the vendor operating system, the LCD repeatedly restarted and the drive LEDs remained off. Our Python monitor supplies system metrics to the original vendor executable `serialtest`.
+Restore the **original LincStation S1 LCD display pages, drive status LEDs and network LED** when running **Debian 12 Linux with OpenMediaVault (OMV)** instead of the vendor-supplied operating system (Unraid).
+
+On our LincStation S1 NAS, replacing the vendor-supplied Unraid installation with Debian Linux caused the LCD to restart repeatedly while the drive LEDs remained off. This open-source project uses a **Python system monitor** to supply CPU, memory, network, disk and temperature metrics to the original vendor executable `serialtest`, restoring the display and LED functions without flashing display firmware.
 
 > **Beta (`v0.5.0-beta`):** The LCD, disk LEDs and network LED work on our S1, including after reboot. The complete installation process using these scripts has not yet been tested on a second machine.
 
-## Confirmed working setup
+## Confirmed working setup — LincStation S1 on Debian / OMV
 
 - LincStation S1 running Debian 12 and OpenMediaVault (one tested machine)
 - Four original LCD pages, drive LEDs and network LED
@@ -19,7 +21,15 @@ This project restores the original LCD pages and status LEDs on a LincStation S1
 
 Hardware revisions, interface names and physical disk mappings may differ on other systems.
 
-## How it works
+## Compatibility with other Linux and NAS operating systems
+
+This project was developed and tested on a **LincStation S1 running Debian 12 with OpenMediaVault (OMV)**.
+
+Other Linux-based operating systems and NAS platforms, including **Ubuntu Server**, **TrueNAS SCALE** and other **Debian-based distributions**, might be able to use this solution as-is or as a starting point with minor adaptations. The Python monitor, LCD communication and systemd services may be reusable, but installation scripts, dependencies, device paths or system configuration could require changes.
+
+**These operating systems have not been tested, and compatibility is not confirmed.** The project should not be considered a ready-to-install solution for these platforms. Feedback and contributions from users testing other Linux-based NAS systems are welcome.
+
+## How the LCD display and LED control work
 
 `src/debian-monitor.py` writes metrics to `/run/lincstation/state.json`. The compatibility symlink `/var/unraid-systemMonitor/state.json` lets the original `serialtest` read those metrics. On the tested machine, the display controller communicates over `/dev/ttyS0` at 9600 baud.
 
@@ -47,7 +57,7 @@ LincStation S1 ... .zip
 
 On Debian, **do not install** the Unraid `.txz` package. Our installer uses Debian APT to install `i2c-tools` and loads the `i2c-dev` kernel module.
 
-## Installation on a new S1
+## Installation on a new LincStation S1 (Debian 12 / OpenMediaVault)
 
 **Before starting:** Install Debian 12 / OpenMediaVault. Confirm `/dev/ttyS0` exists and is not in use by another service. Run these commands from the root directory of the downloaded GitHub repository.
 
@@ -136,7 +146,7 @@ lincstation-s1-lcd-led-control/
 
 The published example JSON contains `UNKNOWN`, not a real serial number. The Python monitor reads each machine's **own** BIOS serial from `/sys/class/dmi/id/product_serial` at runtime. Never upload `/run/lincstation/state.json`, private logs, backups or vendor executables without redistribution permission.
 
-## Known limitations
+## Known limitations and hardware compatibility
 
 - Tested bay mapping: slots 5/6 NVMe and slots 1/2 SATA. Device names may differ across machines or boots.
 - Disk and network mapping is not universal; SMART output varies by drive.
@@ -144,10 +154,12 @@ The published example JSON contains `UNKNOWN`, not a real serial number. The Pyt
 - The LCD shows `FW 30.17`, but its interpretation as controller firmware has not been independently verified. `serialtest -v` reports `V22.22`.
 - The vendor bundles I²C tooling; a direct dependency of `serialtest` on these tools has not been separately demonstrated.
 - Full fresh installation, including ZIP/ISO extraction, has not been tested on another machine.
+- Ubuntu Server, TrueNAS SCALE and other Linux-based NAS operating systems have not been tested; adaptation may be required.
 
 ## Licensing and vendor rights
 
-Do not redistribute the original `serialtest` or `monitor` executables in a public repository without appropriate permission. A public vendor download link does not itself grant redistribution rights. 
+Do not redistribute the original `serialtest` or `monitor` executables in a public repository without appropriate permission. A public vendor download link does not itself grant redistribution rights.
+
 ## License
 
 This project is licensed under the GNU General Public License v3.0 (GPL-3.0). See the [LICENSE](LICENSE) file for details.
