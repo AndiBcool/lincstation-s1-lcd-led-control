@@ -1,14 +1,14 @@
-# LincStation S1 – LCD-Display und LEDs unter Debian / OpenMediaVault
+# LincStation S1 – LCD-Display und LED-Steuerung unter Debian 12 und OpenMediaVault (OMV)
 
 **🌐 Sprache / Language:** [English](../README.md) | **Deutsch**
 
 **Inoffizielles Community-Projekt – keine Verbindung zum Hersteller LincStation.**
 
-Dieses Projekt stellt auf einer LincStation S1 mit Debian 12 und OpenMediaVault die originalen LCD-Anzeigen und Status-LEDs wieder her. Nach dem Wechsel vom Herstellersystem startete das LCD auf unserem Gerät wiederholt neu und die Laufwerks-LEDs blieben aus. Ein eigener Python-Monitor liefert die Systemdaten an das originale Herstellerprogramm `serialtest`.
+Dieses Projekt stellt die **originalen LCD-Anzeigen sowie Laufwerks- und Netzwerk-LEDs der LincStation S1 NAS** unter **Debian 12 mit OpenMediaVault (OMV)** wieder her. Nach dem Wechsel vom mitgelieferten Herstellersystem (**Unraid**) auf Debian Linux startete das LCD auf unserem Gerät wiederholt neu und die Laufwerks-LEDs blieben aus. Unser eigener Python-Monitor liefert die Systemdaten an das originale Herstellerprogramm `serialtest` und ermöglicht damit die Anzeige und LED-Steuerung.
 
 > **Beta-Version (`v0.5.0-beta`):** LCD, Laufwerks-LEDs und Netzwerk-LED funktionieren auf unserer S1, auch nach einem Neustart. Die vollständige Neuinstallation mit den bereitgestellten Skripten wurde auf einem zweiten Gerät noch nicht getestet.
 
-## Erfolgreich getestet
+## Erfolgreich getestet: LincStation S1 mit Debian und OpenMediaVault
 
 - LincStation S1 mit Debian 12 und OpenMediaVault (ein Gerät)
 - Vier originale LCD-Seiten, Laufwerks-LEDs und Netzwerk-LED
@@ -19,7 +19,17 @@ Dieses Projekt stellt auf einer LincStation S1 mit Debian 12 und OpenMediaVault 
 
 Andere Hardwarestände, Schnittstellennamen und Laufwerkszuordnungen sind nicht automatisch identisch.
 
-## Funktionsweise
+## Mögliche Verwendung unter anderen Linux- und NAS-Betriebssystemen
+
+Entwickelt und erfolgreich getestet wurde die Lösung ausschließlich auf einer **LincStation S1 mit Debian 12 und OpenMediaVault (OMV)**.
+
+Auch unter **Ubuntu Server, TrueNAS SCALE oder anderen Linux-basierten NAS-Systemen** könnte sich die Lösung möglicherweise direkt oder mit kleineren Anpassungen verwenden lassen. Der Python-Monitor, die Kommunikation mit dem LCD und die systemd-Dienste können dafür eine Grundlage bieten.
+
+**Diese Systeme wurden nicht getestet; eine Kompatibilität ist daher nicht bestätigt.** Je nach Betriebssystem können Änderungen an Installationsskripten, Abhängigkeiten, Gerätepfaden oder der Systemkonfiguration notwendig sein. Insbesondere bei stärker verwalteten NAS-Plattformen sind auch umfangreichere Anpassungen möglich.
+
+Erfahrungsberichte und Beiträge von Nutzern anderer Betriebssysteme sind willkommen.
+
+## Funktionsweise der LCD- und LED-Steuerung
 
 `src/debian-monitor.py` schreibt aktuelle Messwerte nach `/run/lincstation/state.json`. Über den Kompatibilitätslink `/var/unraid-systemMonitor/state.json` kann das originale `serialtest` diese Daten lesen. Die Kommunikation mit dem LCD-Controller erfolgt auf dem getesteten Gerät über `/dev/ttyS0` (9600 Baud).
 
@@ -47,7 +57,7 @@ LincStation S1 ... .zip
 
 Unter Debian wird **nicht** das Unraid-`.txz`-Paket verwendet. Stattdessen installiert unser Installer `i2c-tools` über APT und lädt das Kernelmodul `i2c-dev`.
 
-## Installation auf einer neuen S1
+## Installation auf einer neuen LincStation S1 mit Debian / OMV
 
 **Vorbereitung:** Debian 12 / OpenMediaVault installieren. Sicherstellen, dass `/dev/ttyS0` vorhanden und nicht anderweitig belegt ist. Die folgenden Befehle werden im Hauptverzeichnis des heruntergeladenen GitHub-Repositories ausgeführt.
 
@@ -129,10 +139,11 @@ Die veröffentlichte Beispiel-JSON enthält keine echte Seriennummer, sondern `U
 - Das LCD zeigt `FW 30.17`; die Bedeutung als Controller-Firmwarestand ist nicht unabhängig verifiziert. `serialtest -v` meldet `V22.22`.
 - Der Hersteller liefert I²C-Werkzeuge mit. Ob `serialtest` selbst unmittelbar auf I²C angewiesen ist, wurde nicht gesondert nachgewiesen.
 - Die komplette Erstinstallation einschließlich ZIP-/ISO-Extraktion wurde noch nicht auf einem weiteren Gerät getestet.
+- **Ubuntu Server, TrueNAS SCALE und andere Linux-/NAS-Systeme wurden nicht getestet.** Eine Verwendung könnte möglich sein, gegebenenfalls mit Anpassungen; eine Kompatibilität wird nicht zugesichert.
 
 ## Lizenz und Herstellerrechte
 
-Das originale `serialtest` und das originale `monitor` dürfen nicht ohne entsprechende Erlaubnis im öffentlichen Repository verteilt werden. Ein offizieller Downloadlink allein erteilt keine Weiterverbreitungsrechte. 
+Das originale `serialtest` und das originale `monitor` dürfen nicht ohne entsprechende Erlaubnis im öffentlichen Repository verteilt werden. Ein offizieller Downloadlink allein erteilt keine Weiterverbreitungsrechte.
 
 ## Lizenz
 
