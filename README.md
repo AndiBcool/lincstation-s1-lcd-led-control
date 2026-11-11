@@ -2,7 +2,7 @@
 
 **🌐 Language / Sprache:** **English** | [Deutsch](docs/README.de.md)
 
-**Unofficial community project — not affiliated with LincStation.**
+**Unofficial community project — not affiliated with LincPlus.**
 
 Restore the **original LincStation S1 LCD display pages, drive status LEDs and network LED** when running **Debian 12 Linux with OpenMediaVault (OMV)** instead of the vendor-supplied operating system (Unraid).
 
