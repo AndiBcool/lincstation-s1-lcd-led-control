@@ -2,7 +2,7 @@
 
 **🌐 Sprache / Language:** [English](../README.md) | **Deutsch**
 
-**Inoffizielles Community-Projekt – keine Verbindung zum Hersteller LincStation.**
+**Inoffizielles Community-Projekt – keine Verbindung zum Hersteller LincPlus.**
 
 Dieses Projekt stellt die **originalen LCD-Anzeigen sowie Laufwerks- und Netzwerk-LEDs der LincStation S1 NAS** unter **Debian 12 mit OpenMediaVault (OMV)** wieder her. Nach dem Wechsel vom mitgelieferten Herstellersystem (**Unraid**) auf Debian Linux startete das LCD auf unserem Gerät wiederholt neu und die Laufwerks-LEDs blieben aus. Unser eigener Python-Monitor liefert die Systemdaten an das originale Herstellerprogramm `serialtest` und ermöglicht damit die Anzeige und LED-Steuerung.
 
